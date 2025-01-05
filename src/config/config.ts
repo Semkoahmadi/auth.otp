@@ -9,8 +9,8 @@ const AppConfig = registerAs(ConfigKeys.App, () => ({
     port: 3000,
 }));
 const JwtConfig = registerAs(ConfigKeys.Jwt, () => ({
-    accessTokenSecret:"8f6df519a2125946820bc34a561164c2",
-    refreshTokenSecret: "2b1de99ad2e00da88b0f5a6d113569a0",
+    accessTokenSecret:"a39730b7d46d6c38f1f28c832ea18e12",
+    refreshTokenSecret: "8d389ad4c68ef56d7ab929b0974631e7",
 }));
 const DbConfig = registerAs(ConfigKeys.Db, () => ({
     port: 5432,

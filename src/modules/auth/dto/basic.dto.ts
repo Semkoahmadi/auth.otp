@@ -1,12 +1,16 @@
 import { IsEmail, IsMobilePhone, IsString, Length } from 'class-validator';
-import { Column } from 'typeorm';
+import { ConfirmedPassword } from 'src/common/decorators/password.Decorator';
 
 export class SignupDto {
   @IsString()
   first_name: string;
   @IsString()
   last_name: string;
-  @IsMobilePhone('fa-IR', {}, { message: 'Sorry Bro!...' })
+  @IsMobilePhone(
+    'fa-IR',
+     {}, 
+    { message: 'Sorry Bro!...'} 
+)
   mobile: string;
   @IsString()
   @IsEmail({}, { message: 'Sorry For Email..!!' })
@@ -15,6 +19,7 @@ export class SignupDto {
   @Length(6, 20, { message: 'Sorry Pass!...' })
   password: string;
   @IsString()
+  @ConfirmedPassword("password")
   confirm_password: string;
 }
 export class LoginDto {

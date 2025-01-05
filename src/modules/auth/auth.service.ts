@@ -13,8 +13,8 @@ import { randomInt } from 'crypto';
 import { JwtService } from '@nestjs/jwt';
 import { TokensPayload } from './types/payload';
 import { ConfigService } from '@nestjs/config';
-import { SignupDto } from './dto/basic.dto';
-import { genSaltSync, hashSync } from 'bcrypt';
+import { LoginDto, SignupDto } from './dto/basic.dto';
+import { compareSync, genSaltSync, hashSync } from 'bcrypt';
 
 @Injectable()
 export class AuthService {
@@ -24,7 +24,7 @@ export class AuthService {
     @InjectRepository(OTPEntity) private otpRepository: Repository<OTPEntity>,
     private jwtService: JwtService,
     private configService: ConfigService
-  ) {}
+  ) { }
 
   async sendOtp(otpDto: SendOtpDto) {
     const { mobile } = otpDto;
@@ -70,15 +70,11 @@ export class AuthService {
     return { accessToken, refreshToken, message: 'Logged-in Success' };
   }
   async signup(signupDto: SignupDto) {
-    const { first_name, last_name, email, password, confirm_password, mobile } =
+    const { first_name, last_name, email, password, mobile } =
       signupDto;
     await this.checkEmail(email);
     await this.checkMobile(mobile);
-    if (password !== confirm_password) {
-      throw new BadRequestException('Gwat...');
-    }
-    const salt = genSaltSync(10);
-    let hashedpassword = hashSync(password, salt);
+    let hashedpassword = this.hashPasswors(password);
     const user = await this.userRepository.create({
       first_name,
       last_name,
@@ -89,8 +85,25 @@ export class AuthService {
     });
     await this.userRepository.save(user);
     return {
-      message:"Welcome .."
+      message: "Welcome .."
     }
+  }
+
+  async login(loginDto: LoginDto) {
+    const { email, password } = loginDto;
+    const user = await this.userRepository.findOneBy({ email });
+    if (!user) {
+      throw new UnauthorizedException("Boro Koskesh...")
+    }
+    if (!compareSync(password, user.password)) {
+      throw new UnauthorizedException("Boro Koskesh2...")
+    }
+    const { accessToken, refreshToken } = this.makeTokenForUSer({
+      id: user.id,
+      mobile: user.mobile
+    });
+    return { accessToken, refreshToken, message: "Be to Mersh Dadash" };
+
   }
   async checkEmail(email: string) {
     const user = await this.userRepository.findOneBy({ email });
@@ -148,4 +161,9 @@ export class AuthService {
       throw new UnauthorizedException('Login On Your Account');
     }
   }
+  hashPasswors(password: string) {
+    const salt = genSaltSync(10);
+    return hashSync(password, salt);
+  }
+
 }
